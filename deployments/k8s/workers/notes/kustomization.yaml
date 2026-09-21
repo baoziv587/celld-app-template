@@ -12,7 +12,7 @@ labels:
 configMapGenerator:
   - name: fleet
     literals:
-      # Must match the bucket prefix that `pnpm deploy:worker notes` publishes to.
+      # Must match the bucket prefix that `pnpm manage deploy notes` publishes to.
       - CELLD_BUCKET=s3://cells/notes
 replicas:
   - name: celld

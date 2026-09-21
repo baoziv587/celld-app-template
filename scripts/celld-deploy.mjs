@@ -1,7 +1,7 @@
-// Entrypoint of the worker image: inject runtime vars, then run `celld deploy`.
+// Publish the worker in the current directory: merge runtime vars, then `celld deploy`.
 //
 // celld only reads worker variables from the Wrangler config at deploy time.
-// Secrets must not be baked into the image, so they arrive as WORKER_VAR_<NAME>
+// Secrets must not live in wrangler.json, so they arrive as WORKER_VAR_<NAME>
 // environment variables and are merged into a throwaway config right here.
 import { spawnSync } from 'node:child_process'
 import { readFileSync, writeFileSync } from 'node:fs'

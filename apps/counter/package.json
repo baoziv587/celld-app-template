@@ -4,11 +4,17 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "celld dev . --port 8701",
+    "dev": "vite",
+    "preview": "celld dev . --port 8801",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@template/worker-kit": "workspace:*",
     "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.56.0",
+    "vite": "^8.3.0",
+    "wrangler": "^4.135.0"
   }
 }

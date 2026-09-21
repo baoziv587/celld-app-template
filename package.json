@@ -8,20 +8,16 @@
     "node": ">=24"
   },
   "scripts": {
-    "dev": "pnpm --parallel --filter \"./apps/*\" dev",
+    "dev": "tsx scripts/manage.ts dev --all",
     "build": "pnpm -r --if-present build",
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "vitest run",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm check:infra",
-    "check:infra": "./deployments/check-infra.sh",
-    "new:worker": "tsx scripts/create-worker.ts",
-    "stack:up": "docker compose --profile all up --build --remove-orphans",
-    "stack:down": "docker compose --profile all down",
-    "deploy:worker": "tsx scripts/deploy-worker.ts",
-    "k8s:apply": "kubectl apply -k deployments/k8s",
-    "k8s:diff": "kubectl diff -k deployments/k8s"
+    "check": "pnpm lint:strict && pnpm typecheck && pnpm test && pnpm manage check",
+    "manage": "tsx scripts/manage.ts",
+    "lint:strict": "CI=1 eslint . --max-warnings 0 --cache --cache-location node_modules/.cache/eslint/",
+    "prepare": "git config core.hooksPath .githooks || true"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^9.5.1",

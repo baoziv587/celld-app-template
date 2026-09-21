@@ -1,5 +1,5 @@
 # The whole cluster side, applied once:  kubectl apply -k deployments/k8s
-# Releasing worker code never touches Kubernetes; see `pnpm deploy:worker`.
+# Releasing worker code never touches Kubernetes; see `pnpm manage deploy`.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:

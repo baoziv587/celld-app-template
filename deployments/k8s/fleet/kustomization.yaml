@@ -3,7 +3,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - celld.yaml
-# The cluster-side celld version. check-infra.sh keeps it equal to versions.env.
+# The only place the celld version is written.
 images:
   - name: ghcr.io/denoland/celld
     newTag: v0.5.1

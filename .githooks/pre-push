@@ -1,0 +1,11 @@
+#!/bin/sh
+# Nothing gets pushed without passing ESLint. The whole repo is linted, not just
+# the pushed files, so an app cannot slip past the root rules.
+# Installed by `pnpm install` (the "prepare" script sets core.hooksPath).
+
+cd "$(git rev-parse --show-toplevel)" || exit 1
+
+if ! pnpm -s lint:strict; then
+  printf '\npre-push: ESLint failed, push aborted. Try `pnpm lint:fix`, then fix what remains.\n' >&2
+  exit 1
+fi

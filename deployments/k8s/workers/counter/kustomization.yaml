@@ -12,7 +12,7 @@ labels:
 configMapGenerator:
   - name: fleet
     literals:
-      # Must match the bucket prefix that `pnpm deploy:worker counter` publishes to.
+      # Must match the bucket prefix that `pnpm manage deploy counter` publishes to.
       - CELLD_BUCKET=s3://cells/counter
 replicas:
   - name: celld

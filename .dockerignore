@@ -1,9 +1,0 @@
-.git
-**/node_modules
-**/dist
-**/.celld
-**/.dev.vars
-**/.prod.vars
-deployments/deploy.env
-**/credentials.env
-.env
