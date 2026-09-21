@@ -1,0 +1,22 @@
+# Shared by every worker: namespace, object storage, one bucket, one credential.
+# On S3, R2 or GCS drop rustfs.yaml and bucket-init.yaml and point S3_ENDPOINT there.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: cells
+resources:
+  - namespace.yaml
+  - rustfs.yaml
+  - bucket-init.yaml
+# Fleets reference these two by name, so the names must stay stable.
+generatorOptions:
+  disableNameSuffixHash: true
+configMapGenerator:
+  - name: celld-storage
+    literals:
+      - S3_ENDPOINT=http://rustfs.cells.svc.cluster.local:9000
+      - AWS_REGION=us-east-1
+      - BUCKET=cells
+secretGenerator:
+  - name: celld-storage-credentials
+    # Copy credentials.example.env to credentials.env (gitignored).
+    envs: [credentials.env]

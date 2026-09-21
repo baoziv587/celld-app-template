@@ -1,0 +1,12 @@
+{
+  "name": "counter",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-09-01",
+  "vars": {
+    "MAX_STEP": "100"
+  },
+  "durable_objects": {
+    "bindings": [{ "name": "COUNTERS", "class_name": "CounterCell" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["CounterCell"] }]
+}

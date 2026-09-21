@@ -1,0 +1,50 @@
+# Shared platform for local full-stack runs. It has no profile, so it always starts. Workers add themselves through
+# apps/<worker>/compose.yaml, listed in the root docker-compose.yaml.
+name: celld-app-template
+
+services:
+  rustfs:
+    image: rustfs/rustfs:latest
+    restart: unless-stopped
+    ports:
+      - '${RUSTFS_API_PORT:?set in deployments/compose.env}:9000'
+      - '${RUSTFS_CONSOLE_PORT:?set in deployments/compose.env}:9001'
+    volumes:
+      - rustfs-data:/data
+      - rustfs-logs:/logs
+    environment:
+      RUSTFS_ACCESS_KEY: '${RUSTFS_ACCESS_KEY:?set in deployments/compose.env}'
+      RUSTFS_SECRET_KEY: '${RUSTFS_SECRET_KEY:?set in deployments/compose.env}'
+      RUSTFS_ADDRESS: ':9000'
+      RUSTFS_CONSOLE_ADDRESS: '0.0.0.0:9001'
+      RUSTFS_CONSOLE_ENABLE: 'true'
+      RUSTFS_OBS_LOGGER_LEVEL: error
+      RUSTFS_OBS_LOG_DIRECTORY: /logs
+    command: [/data]
+    healthcheck:
+      test: [CMD-SHELL, 'curl --fail --silent http://localhost:9000/health >/dev/null']
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  # One shared bucket; every worker's fleet lives under its own prefix, as in Kubernetes.
+  bucket:
+    image: amazon/aws-cli:2.36.19
+    depends_on:
+      rustfs:
+        condition: service_healthy
+    environment:
+      AWS_ACCESS_KEY_ID: '${RUSTFS_ACCESS_KEY:?set in deployments/compose.env}'
+      AWS_SECRET_ACCESS_KEY: '${RUSTFS_SECRET_KEY:?set in deployments/compose.env}'
+      AWS_REGION: us-east-1
+    entrypoint: [/bin/sh, -ec]
+    command:
+      - |
+        aws --endpoint-url http://rustfs:9000 s3api head-bucket --bucket cells >/dev/null 2>&1 \
+          || aws --endpoint-url http://rustfs:9000 s3api create-bucket --bucket cells >/dev/null
+        echo "bucket ready: cells"
+    restart: no
+
+volumes:
+  rustfs-data:
+  rustfs-logs:

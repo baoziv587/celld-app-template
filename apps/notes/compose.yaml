@@ -1,0 +1,51 @@
+# Local full-stack run of the "notes" worker: publish it under its own bucket prefix,
+# then serve it from a single celld node. Paths are relative to the repo root.
+x-storage: &storage
+  AWS_ACCESS_KEY_ID: '${RUSTFS_ACCESS_KEY:?set in deployments/compose.env}'
+  AWS_SECRET_ACCESS_KEY: '${RUSTFS_SECRET_KEY:?set in deployments/compose.env}'
+  AWS_REGION: us-east-1
+  S3_ENDPOINT: http://rustfs:9000
+  CELLD_BUCKET: s3://cells/notes
+
+services:
+  notes-deploy:
+    profiles: [notes, all]
+    build:
+      context: .
+      dockerfile: deployments/Dockerfile.worker
+      args:
+        WORKER: notes
+        CELLD_IMAGE: '${CELLD_IMAGE:?set in deployments/versions.env}'
+    depends_on:
+      bucket:
+        condition: service_completed_successfully
+    environment:
+      <<: *storage
+      # Runtime vars and secrets: WORKER_VAR_<NAME> overrides wrangler.json "vars".
+      # WORKER_VAR_EXAMPLE: "${EXAMPLE:-}"
+    restart: no
+
+  notes-celld:
+    profiles: [notes, all]
+    image: '${CELLD_IMAGE:?set in deployments/versions.env}'
+    depends_on:
+      notes-deploy:
+        condition: service_completed_successfully
+    ports:
+      - '8802:8080'
+    volumes:
+      - notes-celld-state:/var/lib/celld
+    environment:
+      <<: *storage
+      CELLD_WATCH: /var/lib/celld/state
+    command:
+      - --listen
+      - 0.0.0.0:8080
+      - --internal-listen
+      - 0.0.0.0:8081
+      - --advertise
+      - notes-celld:8081
+    restart: unless-stopped
+
+volumes:
+  notes-celld-state:

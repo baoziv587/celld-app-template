@@ -1,0 +1,12 @@
+node_modules
+dist/
+.celld/
+.dev.vars
+.env
+wrangler.deploy.json
+# Real secrets never enter git; commit the *.example.env next to them.
+apps/*/.prod.vars
+deployments/deploy.env
+deployments/k8s/platform/credentials.env
+.DS_Store
+*.tsbuildinfo

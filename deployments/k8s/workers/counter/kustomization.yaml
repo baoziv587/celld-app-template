@@ -1,0 +1,25 @@
+# Everything Kubernetes knows about the "counter" worker.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: cells
+namePrefix: counter-
+resources:
+  - ../../fleet
+labels:
+  - pairs:
+      app.kubernetes.io/instance: counter
+    includeSelectors: true
+configMapGenerator:
+  - name: fleet
+    literals:
+      # Must match the bucket prefix that `pnpm deploy:worker counter` publishes to.
+      - CELLD_BUCKET=s3://cells/counter
+replicas:
+  - name: celld
+    count: 2
+patches:
+  - target: {kind: Ingress, name: celld}
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: counter.example.com

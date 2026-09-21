@@ -1,0 +1,16 @@
+# Thin adapter: the platform lives in deployments/, each worker owns its own
+# compose file. `pnpm new:worker` appends the include for a new worker.
+#
+#   docker compose up -d                            platform only (RustFS + buckets)
+#   docker compose --profile counter up --build     platform + one worker
+#   docker compose --profile all up --build         everything
+include:
+  - path: deployments/docker-compose.yaml
+    project_directory: .
+    env_file: [deployments/versions.env, deployments/compose.env]
+  - path: apps/counter/compose.yaml
+    project_directory: .
+    env_file: [deployments/versions.env, deployments/compose.env]
+  - path: apps/notes/compose.yaml
+    project_directory: .
+    env_file: [deployments/versions.env, deployments/compose.env]

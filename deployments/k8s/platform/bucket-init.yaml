@@ -1,0 +1,23 @@
+# Creates the one shared bucket. Every fleet lives under its own prefix in it.
+# The finished Job expires, so a later `kubectl apply -k` simply runs it again.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: celld-bucket-init
+spec:
+  backoffLimit: 10
+  ttlSecondsAfterFinished: 600
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: bucket-init
+          image: amazon/aws-cli:2.36.19
+          command: [/bin/sh, -ec]
+          args:
+            - |
+              aws --endpoint-url "$S3_ENDPOINT" s3api head-bucket --bucket "$BUCKET" >/dev/null 2>&1 \
+                || aws --endpoint-url "$S3_ENDPOINT" s3api create-bucket --bucket "$BUCKET"
+          envFrom:
+            - configMapRef: {name: celld-storage}
+            - secretRef: {name: celld-storage-credentials}

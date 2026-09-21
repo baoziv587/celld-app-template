@@ -1,0 +1,14 @@
+{
+  "name": "counter",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "celld dev . --port 8701",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@template/worker-kit": "workspace:*",
+    "zod": "^4.0.0"
+  }
+}

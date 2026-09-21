@@ -1,0 +1,9 @@
+# Base for one fleet. A worker overlay adds a name prefix, a bucket prefix and a host.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - celld.yaml
+# The cluster-side celld version. check-infra.sh keeps it equal to versions.env.
+images:
+  - name: ghcr.io/denoland/celld
+    newTag: v0.5.1

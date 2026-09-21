@@ -1,0 +1,2 @@
+# Copy to .dev.vars. Only `celld dev` reads it; entries override wrangler.json vars.
+MAX_STEP=1000
