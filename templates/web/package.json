@@ -1,11 +1,11 @@
 {
-  "name": "notes",
+  "name": "template-web",
   "type": "module",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "vite",
-    "preview": "vite build && celld dev . --port 8802",
+    "preview": "vite build && celld dev . --port 8891",
     "build": "vite build",
     "typecheck": "tsc --build"
   },

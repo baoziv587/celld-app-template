@@ -6,6 +6,8 @@ import process from 'node:process'
 export const REPO_ROOT = resolve(import.meta.dirname, '../..')
 export const APPS_DIR = join(REPO_ROOT, 'apps')
 export const K8S_DIR = join(REPO_ROOT, 'deployments/k8s')
+/** Worker templates. They are workspace packages, so lint, typecheck and tests cover them too. */
+export const TEMPLATES_DIR = join(REPO_ROOT, 'templates')
 
 export interface Command {
   name: string
@@ -21,6 +23,9 @@ export function fail(message: string): never {
 
 /** A worker is any directory under apps/ that has a wrangler.json. */
 export function listWorkers(): string[] {
+  if (!existsSync(APPS_DIR)) {
+    return []
+  }
   return readdirSync(APPS_DIR)
     .filter(name => existsSync(join(APPS_DIR, name, 'wrangler.json')))
     .sort()
@@ -31,7 +36,7 @@ export function requireWorker(name: string | undefined, usage: string): string {
     fail(`usage: ${usage}`)
   }
   if (!listWorkers().includes(name)) {
-    fail(`no such worker: ${name} (known: ${listWorkers().join(', ')})`)
+    fail(`no such worker: ${name} (known: ${listWorkers().join(', ') || 'none yet, run pnpm manage new'})`)
   }
   return name
 }

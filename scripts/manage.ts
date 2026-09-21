@@ -11,8 +11,9 @@ import { dev, preview } from './manage/dev'
 import { k8s } from './manage/k8s'
 import { list } from './manage/list'
 import { newWorker } from './manage/new'
+import { remove } from './manage/remove'
 
-const COMMANDS: readonly Command[] = [newWorker, dev, preview, list, check, deploy, k8s]
+const COMMANDS: readonly Command[] = [newWorker, remove, dev, preview, list, check, deploy, k8s]
 
 function help(): string {
   const width = Math.max(...COMMANDS.map(command => command.usage.length))

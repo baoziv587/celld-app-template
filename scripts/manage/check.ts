@@ -39,7 +39,8 @@ export const check: Command = {
     const workers = listWorkers()
     const rootKustomization = readFileSync(join(K8S_DIR, 'kustomization.yaml'), 'utf8')
 
-    const orphans = readdirSync(join(K8S_DIR, 'workers'))
+    const overlaysDir = join(K8S_DIR, 'workers')
+    const orphans = (existsSync(overlaysDir) ? readdirSync(overlaysDir) : [])
       .filter(name => existsSync(join(K8S_DIR, 'workers', name, 'kustomization.yaml')) && !workers.includes(name))
       .map(name => `deployments/k8s/workers/${name} has no apps/${name}`)
 
@@ -47,6 +48,6 @@ export const check: Command = {
     if (problems.length > 0) {
       fail(`\n  ${problems.join('\n  ')}`)
     }
-    console.warn(`ok: ${workers.length} worker(s) consistent (${workers.join(', ')})`)
+    console.warn(workers.length === 0 ? 'ok: no workers yet' : `ok: ${workers.length} worker(s) consistent (${workers.join(', ')})`)
   },
 }

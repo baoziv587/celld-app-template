@@ -13,10 +13,11 @@
 
 ```bash
 pnpm install
+pnpm manage new notes --kind web    # 从模板创建你的第一个 worker
 pnpm manage dev notes
 ```
 
-打开 <http://localhost:8702>。网页、API 和数据库都运行在你的电脑上。改一个文件，页面会自动更新。
+打开 <http://localhost:8701>。网页、API 和数据库都运行在你的电脑上。改一个文件，页面会自动更新。
 
 ## `pnpm manage`
 
@@ -24,7 +25,8 @@ pnpm manage dev notes
 
 | 命令 | 作用 |
 | --- | --- |
-| `pnpm manage new` | 新建 worker。问几个问题，然后复制一个能运行的示例 |
+| `pnpm manage new` | 从 `templates/` 中的模板新建 worker。会问几个问题 |
+| `pnpm manage remove <worker>` | 从仓库中删除 worker 及其 Kubernetes overlay |
 | `pnpm manage dev [worker...]` | 本地开发 worker。不写名字：从列表里选。`--all`：全部 |
 | `pnpm manage preview [worker...]` | 在真实的 celld 运行时上运行，用于发布前验证 |
 | `pnpm manage list` | 列出所有 worker：端口、bucket 前缀、公网域名 |
@@ -54,10 +56,14 @@ pnpm manage new
 
 选一个名字和一种类型：
 
-- **api**：处理请求的代码。从 `apps/counter` 复制。
-- **web**：一个网页加上它背后的代码。从 `apps/notes` 复制。
+- **api**：处理请求的代码。从 `templates/api` 复制。
+- **web**：一个网页加上它背后的代码。从 `templates/web` 复制。
 
 worker 会创建在 `apps/<name>/`，并且马上可以运行。修改 `apps/<name>/worker/` 把它变成你自己的。
+
+`apps/` 完全归你所有：可以随意新增、修改、删除 worker。用 `pnpm manage remove <name>` 删除，它会同时
+清理对应的 Kubernetes overlay。模板放在 `templates/`，和普通 worker 一样被 `pnpm check` 检查，所以仓库
+演进时模板始终可用。想改变新 worker 的起点，直接修改模板。
 
 ### 2. 开发
 
@@ -125,6 +131,9 @@ apps/<name>/                  一个 worker
   shared/                     网页和 worker 共用的类型与 schema
   wrangler.json               worker 配置：名称、bindings、默认变量
   eslint.rules.ts             仅对该 worker 生效的额外 ESLint 规则（可选）
+templates/                    `pnpm manage new` 的复制来源
+  api/  web/                  两种 worker 模板
+  k8s/                        Kubernetes overlay 模板
 packages/worker-kit/          所有 worker 共用的工具函数
 deployments/k8s/              集群侧（kustomize）
   platform/                   namespace、对象存储、共享 bucket 和凭据
@@ -139,7 +148,7 @@ scripts/manage/               `pnpm manage` 的实现
 
 - 每个 worker 必须遵守。
 - worker 可以在 `apps/<name>/eslint.rules.ts` 中追加更严格的规则。
-  示例见 [apps/notes/eslint.rules.ts](apps/notes/eslint.rules.ts)。
+  示例见 [templates/web/eslint.rules.ts](templates/web/eslint.rules.ts)。
 - worker 不能关闭 root 规则。一旦这么写，ESLint 会拒绝运行。
 
 pre-push git hook 会对整个仓库运行 ESLint，失败则阻止 push。`pnpm install` 会自动安装这个 hook。

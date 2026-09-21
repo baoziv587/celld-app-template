@@ -4,19 +4,23 @@ import { join } from 'node:path'
 import antfu from '@antfu/eslint-config'
 import { createSlopConfig } from 'eslint-plugin-slop'
 
-const APPS_DIR = join(import.meta.dirname, 'apps')
+/** Workers, and the templates new workers are copied from. Both obey the same rules. */
+const WORKER_ROOTS = ['apps', 'templates']
 
 /**
  * Root rules bind every app. An app may only add to them, through an optional
- * `apps/<name>/eslint.rules.ts` that default-exports flat config items.
+ * `eslint.rules.ts` in its own directory that default-exports flat config items.
  *
  * The file is deliberately not called eslint.config.ts: ESLint would then pick
  * it up as the nearest config inside the app and skip this one entirely.
  */
 async function appExtensions(): Promise<Linter.Config[]> {
   const extensions: Linter.Config[] = []
-  for (const app of readdirSync(APPS_DIR).sort()) {
-    const file = join(APPS_DIR, app, 'eslint.rules.ts')
+  const appDirs = WORKER_ROOTS
+    .filter(root => existsSync(join(import.meta.dirname, root)))
+    .flatMap(root => readdirSync(join(import.meta.dirname, root)).sort().map(name => `${root}/${name}`))
+  for (const app of appDirs) {
+    const file = join(import.meta.dirname, app, 'eslint.rules.ts')
     if (!existsSync(file)) {
       continue
     }
@@ -25,11 +29,11 @@ async function appExtensions(): Promise<Linter.Config[]> {
       for (const [rule, entry] of Object.entries(item.rules ?? {})) {
         const severity = Array.isArray(entry) ? entry[0] : entry
         if (severity === 'off' || severity === 0) {
-          throw new Error(`apps/${app}/eslint.rules.ts turns off "${rule}". Apps may add or tighten rules, not disable root rules.`)
+          throw new Error(`${app}/eslint.rules.ts turns off "${rule}". Apps may add or tighten rules, not disable root rules.`)
         }
       }
       // Scope to the app, so one app's rules never leak into another.
-      const scoped = (glob: string): string => `apps/${app}/${glob}`
+      const scoped = (glob: string): string => `${app}/${glob}`
       extensions.push({
         ...item,
         files: (item.files ?? ['**/*']).flat().map(scoped),

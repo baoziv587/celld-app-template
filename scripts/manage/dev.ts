@@ -5,6 +5,9 @@ import { fail, listWorkers, requireWorker, run } from './shared'
 
 async function pickWorkers(action: string): Promise<string[]> {
   const workers = listWorkers()
+  if (workers.length === 0) {
+    fail('there are no workers yet; create one with: pnpm manage new')
+  }
   if (workers.length === 1) {
     return workers
   }
@@ -37,6 +40,9 @@ function workerScript(name: string, script: string, summary: string): Command {
         ? listWorkers()
         : named.length > 0 ? named.map(worker => requireWorker(worker, usage)) : await pickWorkers(name)
 
+      if (workers.length === 0) {
+        fail('there are no workers yet; create one with: pnpm manage new')
+      }
       run('pnpm', ['--parallel', ...workers.flatMap(worker => ['--filter', worker]), script])
     },
   }

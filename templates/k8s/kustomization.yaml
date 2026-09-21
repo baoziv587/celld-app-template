@@ -1,19 +1,19 @@
-# Everything Kubernetes knows about the "counter" worker.
+# Everything Kubernetes knows about the "template-worker" worker.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: cells
-namePrefix: counter-
+namePrefix: template-worker-
 resources:
   - ../../fleet
 labels:
   - pairs:
-      app.kubernetes.io/instance: counter
+      app.kubernetes.io/instance: template-worker
     includeSelectors: true
 configMapGenerator:
   - name: fleet
     literals:
-      # Must match the bucket prefix that `pnpm manage deploy counter` publishes to.
-      - CELLD_BUCKET=s3://cells/counter
+      # Must match the bucket prefix that `pnpm manage deploy template-worker` publishes to.
+      - CELLD_BUCKET=s3://cells/template-worker
 replicas:
   - name: celld
     count: 2
@@ -22,4 +22,4 @@ patches:
     patch: |-
       - op: replace
         path: /spec/rules/0/host
-        value: counter.example.com
+        value: template-worker.example.com

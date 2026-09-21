@@ -1,5 +1,5 @@
 {
-  "name": "counter",
+  "name": "template-api",
   "main": "worker/index.ts",
   "compatibility_date": "2026-09-01",
   "vars": {

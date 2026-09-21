@@ -13,10 +13,11 @@ You need [Node 24+](https://nodejs.org) and [pnpm 10+](https://pnpm.io).
 
 ```bash
 pnpm install
+pnpm manage new notes --kind web    # create your first worker from a template
 pnpm manage dev notes
 ```
 
-Open <http://localhost:8702>. The page, the API and the database all run on your machine.
+Open <http://localhost:8701>. The page, the API and the database all run on your machine.
 Edit a file and the page updates by itself.
 
 ## `pnpm manage`
@@ -25,7 +26,8 @@ Run `pnpm manage` with no arguments to pick a command from a menu, or name it di
 
 | Command | What it does |
 | --- | --- |
-| `pnpm manage new` | Create a worker. Asks a few questions, then copies a working example |
+| `pnpm manage new` | Create a worker from a template in `templates/`. Asks a few questions |
+| `pnpm manage remove <worker>` | Delete a worker and its Kubernetes overlay from the repo |
 | `pnpm manage dev [worker...]` | Develop workers locally. No names: pick from a list. `--all`: every worker |
 | `pnpm manage preview [worker...]` | Run workers on the real celld runtime, to verify before a release |
 | `pnpm manage list` | Show every worker: ports, bucket prefix, public host |
@@ -55,10 +57,15 @@ pnpm manage new
 
 Pick a name and a kind:
 
-- **api**: code that answers requests. Copied from `apps/counter`.
-- **web**: a web page plus the code behind it. Copied from `apps/notes`.
+- **api**: code that answers requests. Copied from `templates/api`.
+- **web**: a web page plus the code behind it. Copied from `templates/web`.
 
 The worker is created in `apps/<name>/` and runs right away. Edit `apps/<name>/worker/` to make it yours.
+
+`apps/` is yours: add, change and delete workers freely. Delete one with `pnpm manage remove <name>`,
+which also cleans up its Kubernetes overlay. The templates live in `templates/` and are checked by
+`pnpm check` like any worker, so they keep working as the repo changes. Edit them to change what
+new workers start from.
 
 ### 2. Develop
 
@@ -127,6 +134,9 @@ apps/<name>/                  one worker
   shared/                     types and schemas used by both the page and the worker
   wrangler.json               worker config: name, bindings, default vars
   eslint.rules.ts             extra ESLint rules for this worker only (optional)
+templates/                    what `pnpm manage new` copies from
+  api/  web/                  the two worker templates
+  k8s/                        the Kubernetes overlay template
 packages/worker-kit/          helpers shared by all workers
 deployments/k8s/              the cluster side (kustomize)
   platform/                   namespace, object storage, shared bucket and credentials
@@ -141,7 +151,7 @@ One ESLint config, `eslint.config.ts`, covers the whole repo.
 
 - Every worker must follow it.
 - A worker may add stricter rules in `apps/<name>/eslint.rules.ts`.
-  See [apps/notes/eslint.rules.ts](apps/notes/eslint.rules.ts).
+  See [templates/web/eslint.rules.ts](templates/web/eslint.rules.ts).
 - A worker cannot turn a root rule off. If it tries, ESLint refuses to run.
 
 A pre-push git hook runs ESLint on the whole repo and blocks the push if it fails. `pnpm install`

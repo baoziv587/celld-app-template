@@ -21,7 +21,11 @@ Read README.md for the dev-to-deploy flow.
 - Wire types live in `apps/<worker>/shared/` as Zod schemas used by both the worker and the client.
 - Server state goes in TanStack Query, client-only state in zustand.
 - All repo management goes through `pnpm manage <command>` (`scripts/manage/`). Add new operations there
-  as a `Command`, not as loose scripts or package.json aliases. Add a worker with `pnpm manage new`.
+  as a `Command`, not as loose scripts or package.json aliases. Add a worker with `pnpm manage new`,
+  delete one with `pnpm manage remove`.
+- `apps/` belongs to the user and may be empty. `pnpm manage new` copies from `templates/` (`api`, `web`,
+  `k8s`), which are workspace packages covered by lint, typecheck and tests. Keep templates local: they
+  depend on this repo's worker-kit, tsconfig and fleet base, so a remote template would drift.
 - Root ESLint rules bind every app. App-specific rules go in `apps/<name>/eslint.rules.ts` and may only
   add or tighten; never create an `eslint.config.ts` inside an app, and never bypass the pre-push hook.
 - Shell scripts must run on macOS system bash 3.2 and pass `shellcheck -x`.

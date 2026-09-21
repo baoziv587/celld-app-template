@@ -4,6 +4,7 @@ shellEmulator: true
 
 packages:
   - apps/*
+  - templates/*
   - packages/*
 
 onlyBuiltDependencies:

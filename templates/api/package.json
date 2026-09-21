@@ -1,11 +1,11 @@
 {
-  "name": "counter",
+  "name": "template-api",
   "type": "module",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "vite",
-    "preview": "celld dev . --port 8801",
+    "preview": "celld dev . --port 8890",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
