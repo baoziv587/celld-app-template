@@ -1,12 +1,14 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
+import { useParams } from '@tanstack/react-router'
 import { Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { useDrafts } from './drafts'
-import { notesQuery, useCreateNote, useDeleteNote } from './queries'
+import { useDrafts } from '@/drafts'
+import { notesQuery, useCreateNote, useDeleteNote } from '@/queries'
 
-export function BoardPage({ board }: { board: string }) {
+export function BoardPage() {
+  const { board } = useParams({ from: '/boards/$board' })
   const { data: notes } = useSuspenseQuery(notesQuery(board))
   const draft = useDrafts(state => state.drafts[board] ?? '')
   const setDraft = useDrafts(state => state.setDraft)

@@ -6,7 +6,7 @@ import { parseArgs } from 'node:util'
 import { APPS_DIR, fail, REPO_ROOT, requireWorker, run } from './shared'
 
 const USAGE = 'pnpm manage deploy <worker> [--env path/to/deploy.env]'
-const CELLD_DEPLOY = join(import.meta.dirname, '../celld-deploy.mjs')
+const CELLD_DEPLOY = join(import.meta.dirname, '../celld.mjs')
 
 /** `NAME=value` lines, the same subset of dotenv that celld reads from .dev.vars. */
 function readEnvFile(file: string): Record<string, string> {

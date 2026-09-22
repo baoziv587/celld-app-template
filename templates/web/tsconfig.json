@@ -1,10 +1,14 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "paths": { "@/*": ["./src/*"] }
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@shared/*": ["./shared/*"],
+      "@worker/*": ["./worker/*"]
+    },
+    "types": ["@cloudflare/workers-types", "vite/client"]
   },
-  "references": [
-    { "path": "./tsconfig.web.json" },
-    { "path": "./tsconfig.worker.json" }
-  ],
-  "files": []
+  "include": ["src", "shared", "worker", "vite.config.ts"]
 }

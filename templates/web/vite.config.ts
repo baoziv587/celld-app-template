@@ -1,20 +1,22 @@
-import { fileURLToPath } from 'node:url'
 import { cloudflare } from '@cloudflare/vite-plugin'
 import tailwindcss from '@tailwindcss/vite'
+import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
-export default defineConfig(({ command }) => ({
+/**
+ * TanStack Start on Cloudflare's Vite plugin: `vite dev` runs the whole app in
+ * workerd, `vite build` writes the browser assets and one self-contained worker
+ * bundle to dist/template-web/, which is what celld deploys.
+ */
+export default defineConfig({
   plugins: [
-    react(),
     tailwindcss(),
-    // Dev only: runs worker/index.ts in workerd next to the SPA, from wrangler.json.
-    // The build stays a plain SPA build, because celld deploys from the source
-    // wrangler.json and rejects the config this plugin would generate.
-    command === 'serve' && cloudflare(),
+    cloudflare({ viteEnvironment: { name: 'ssr' } }),
+    tanstackStart(),
+    react(),
   ],
-  resolve: {
-    alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
-  },
-  server: { port: 8791 },
-}))
+  resolve: { tsconfigPaths: true },
+  // Use an explicit IPv4 loopback address for cloudflared's local origin.
+  server: { host: '127.0.0.1', port: 8791 },
+})

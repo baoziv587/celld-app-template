@@ -1,9 +1,9 @@
-import type { Env } from './env'
+import type { Bindings } from './env'
 import { DurableObject } from 'cloudflare:workers'
 
 /** One named counter. Its SQLite database lives with the cell and follows it across nodes. */
-export class CounterCell extends DurableObject<Env> {
-  constructor(ctx: DurableObjectState, env: Env) {
+export class CounterCell extends DurableObject<Bindings> {
+  constructor(ctx: DurableObjectState, env: Bindings) {
     super(ctx, env)
     ctx.storage.sql.exec('CREATE TABLE IF NOT EXISTS counter (id INTEGER PRIMARY KEY CHECK (id = 1), value INTEGER NOT NULL)')
   }

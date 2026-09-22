@@ -1,44 +1,21 @@
-import type { QueryClient } from '@tanstack/react-query'
-import { createRootRouteWithContext, createRoute, createRouter, Outlet, redirect } from '@tanstack/react-router'
-import { boardName } from '../shared/protocol'
-import { BoardPage } from './board-page'
-import { notesQuery } from './queries'
+import { QueryClient } from '@tanstack/react-query'
+import { createRouter } from '@tanstack/react-router'
+import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query'
+import { routeTree } from './routeTree.gen'
 
-const rootRoute = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  component: Outlet,
-  errorComponent: ({ error }) => <p role="alert" className="p-8 text-sm text-destructive">{error instanceof Error ? error.message : 'Something went wrong'}</p>,
-  notFoundComponent: () => <p className="p-8 text-sm text-muted-foreground">Page not found.</p>,
-})
-
-const indexRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/',
-  beforeLoad: () => {
-    throw redirect({ to: '/boards/$board', params: { board: 'default' } })
-  },
-})
-
-const boardRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/boards/$board',
-  params: { parse: raw => ({ board: boardName.parse(raw.board) }) },
-  loader: ({ context, params }) => context.queryClient.ensureQueryData(notesQuery(params.board)),
-  pendingComponent: () => <p className="p-8 text-sm text-muted-foreground">Loading…</p>,
-  component: function BoardRoute() {
-    return <BoardPage board={boardRoute.useParams().board} />
-  },
-})
-
-export function createAppRouter(queryClient: QueryClient) {
-  return createRouter({
-    routeTree: rootRoute.addChildren([indexRoute, boardRoute]),
+/**
+ * Called once per browser tab and once per server-rendered request. Queries
+ * that ran on the server travel to the browser inside the HTML, so the first
+ * page never refetches.
+ */
+export function getRouter() {
+  const queryClient = new QueryClient()
+  const router = createRouter({
+    routeTree,
     context: { queryClient },
     defaultPreload: 'intent',
+    scrollRestoration: true,
   })
-}
-
-declare module '@tanstack/react-router' {
-  interface Register {
-    router: ReturnType<typeof createAppRouter>
-  }
+  setupRouterSsrQueryIntegration({ router, queryClient })
+  return router
 }

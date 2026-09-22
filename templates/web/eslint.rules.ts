@@ -7,10 +7,9 @@ import type { Linter } from 'eslint'
 const rules: Linter.Config[] = [
   {
     files: ['src/**/*.{ts,tsx}'],
-    // src/api.ts is the one place allowed to call fetch: it parses every response.
-    ignores: ['src/api.ts'],
+    // Pages talk to the server through server functions (src/server/), never raw fetch.
     rules: {
-      'no-restricted-globals': ['error', { name: 'fetch', message: 'Call the helpers in src/api.ts so every response is schema-checked.' }],
+      'no-restricted-globals': ['error', { name: 'fetch', message: 'Use a server function from src/server/ instead of fetch.' }],
     },
   },
 ]

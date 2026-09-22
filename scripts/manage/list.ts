@@ -17,9 +17,9 @@ export const list: Command = {
       const overlay = join(K8S_DIR, 'workers', worker, 'kustomization.yaml')
       return {
         worker,
-        kind: existsSync(join(APPS_DIR, worker, 'index.html')) ? 'web' : 'api',
-        dev: firstMatch(join(APPS_DIR, worker, 'vite.config.ts'), /server: \{ port: (\d+) \}/),
-        preview: firstMatch(join(APPS_DIR, worker, 'package.json'), /celld dev \. --port (\d+)/),
+        kind: existsSync(join(APPS_DIR, worker, 'src/routes')) ? 'web' : 'api',
+        dev: firstMatch(join(APPS_DIR, worker, 'vite.config.ts'), /server: \{[^}]*\bport: (\d+)/),
+        preview: firstMatch(join(APPS_DIR, worker, 'package.json'), / dev (?:\S+ )?--port (\d+)/),
         bucket: firstMatch(overlay, /CELLD_BUCKET=(\S+)/),
         host: firstMatch(overlay, /value: (\S+)/),
       }

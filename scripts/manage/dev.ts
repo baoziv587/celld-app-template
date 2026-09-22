@@ -43,7 +43,11 @@ function workerScript(name: string, script: string, summary: string): Command {
       if (workers.length === 0) {
         fail('there are no workers yet; create one with: pnpm manage new')
       }
-      run('pnpm', ['--parallel', ...workers.flatMap(worker => ['--filter', worker]), script])
+      // Prefer TCP for dev tunnels on networks where QUIC/UDP cannot connect.
+      const env = script === 'dev'
+        ? { ...process.env, TUNNEL_TRANSPORT_PROTOCOL: process.env.TUNNEL_TRANSPORT_PROTOCOL ?? 'http2' }
+        : process.env
+      run('pnpm', ['--parallel', ...workers.flatMap(worker => ['--filter', worker]), script], { env })
     },
   }
 }

@@ -4,14 +4,16 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "vite",
-    "preview": "vite build && celld dev . --port 8891",
+    "dev": "vite dev",
     "build": "vite build",
-    "typecheck": "tsc --build"
+    "preview": "vite build && node ../../scripts/celld.mjs dev --port 8891",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.103.2",
     "@tanstack/react-router": "^1.170.38",
+    "@tanstack/react-router-ssr-query": "^1.167.3",
+    "@tanstack/react-start": "^1.168.57",
     "@template/worker-kit": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.3.1",
@@ -24,6 +26,7 @@
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.56.0",
+    "@cloudflare/workers-types": "^5.20260921.1",
     "@tailwindcss/vite": "^4.3.3",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",

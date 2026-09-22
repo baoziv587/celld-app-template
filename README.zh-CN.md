@@ -56,8 +56,11 @@ pnpm manage new
 
 选一个名字和一种类型：
 
-- **api**：处理请求的代码。从 `templates/api` 复制。
-- **web**：一个网页加上它背后的代码。从 `templates/web` 复制。
+- **api**：用 [Hono](https://hono.dev) 写的 JSON API。从 `templates/api` 复制。
+- **web**：用 [TanStack Start](https://tanstack.com/start) 写的服务端渲染 React 应用：页面、
+  server functions 和 `/api` 路由都在一处。从 `templates/web` 复制。
+
+两种都把数据存在带 SQLite 的 Durable Objects（celld 的 "cell"）里。
 
 worker 会创建在 `apps/<name>/`，并且马上可以运行。修改 `apps/<name>/worker/` 把它变成你自己的。
 
@@ -126,11 +129,16 @@ pnpm manage deploy billing
 
 ```text
 apps/<name>/                  一个 worker
-  worker/                     请求处理和 Durable Objects
-  src/                        网页（仅 web 类型）
-  shared/                     网页和 worker 共用的类型与 schema
+  worker/                     Durable Objects 以及操作它们的代码
+  shared/                     客户端和 worker 共用的 Zod schema
   wrangler.json               worker 配置：名称、bindings、默认变量
   eslint.rules.ts             仅对该 worker 生效的额外 ESLint 规则（可选）
+  api 类型：
+    worker/index.ts           Hono 应用：路由与校验
+  web 类型：
+    src/routes/               页面和 /api 路由（TanStack 文件路由）
+    src/server/               页面调用的 server functions
+    src/server.ts             worker 入口：TanStack Start + 导出的 cells
 templates/                    `pnpm manage new` 的复制来源
   api/  web/                  两种 worker 模板
   k8s/                        Kubernetes overlay 模板
@@ -186,5 +194,8 @@ pnpm check    # ESLint + 类型 + 测试 + pnpm manage check
 ## 技术栈
 
 Worker：TypeScript、Zod、Durable Objects（SQLite）。
-Web：Vite、React、TanStack Router 和 Query、zustand、Tailwind CSS、shadcn/ui
-（在 `apps/<name>` 目录下用 `pnpm dlx shadcn@latest add <component>` 添加组件）。
+api 类型：Hono。
+web 类型：TanStack Start（服务端渲染 React、server functions、`/api` 路由）、TanStack Query、zustand、
+Tailwind CSS、shadcn/ui（在 `apps/<name>` 目录下用 `pnpm dlx shadcn@latest add <component>` 添加组件）。
+`vite build` 会把浏览器资源和 worker bundle 写到 `dist/`，`pnpm manage preview` 和 `pnpm manage deploy`
+用的就是它。

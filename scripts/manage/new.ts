@@ -1,5 +1,5 @@
 import type { Command } from './shared'
-import { execFileSync } from 'node:child_process'
+import { spawnSync } from 'node:child_process'
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { basename, join } from 'node:path'
 import process from 'node:process'
@@ -15,14 +15,16 @@ import { APPS_DIR, fail, K8S_DIR, REPO_ROOT, TEMPLATES_DIR } from './shared'
  */
 const KINDS = {
   api: { label: 'API only', hint: 'Worker + Durable Object, no frontend' },
-  web: { label: 'Web app', hint: 'React SPA + Worker + Durable Object' },
+  web: { label: 'Web app', hint: 'TanStack Start (server-rendered React) + Durable Object' },
 } as const
 type Kind = keyof typeof KINDS
 
 /** Files where the template's name appears as an identifier, not as prose. */
-const RENAMED_FILES = ['package.json', 'wrangler.json', 'index.html']
-const DEV_PORT = /server: \{ port: (\d+) \}/
-const PREVIEW_PORT = /celld dev \. --port (\d+)/
+const RENAMED_FILES = ['package.json', 'wrangler.json']
+/** The `server` line of vite.config.ts, e.g. `server: { host: '127.0.0.1', port: 8790 }`. */
+const DEV_PORT = /server: \{[^}]*\bport: (\d+)/
+/** The `preview` script: `celld dev . --port N` or `celld.mjs dev --port N`. */
+const PREVIEW_PORT = / dev (?:\S+ )?--port (\d+)/
 const NEVER_COPIED = new Set(['node_modules', 'dist', '.celld', '.wrangler', '.dev.vars', '.prod.vars', 'wrangler.deploy.json'])
 
 /** Same rule celld applies to the Wrangler `name`, shortened so derived K8s names fit in 63 bytes. */
@@ -84,8 +86,8 @@ function scaffold({ name, kind, host }: Plan): { previewPort: number, devPort: n
   for (const file of RENAMED_FILES) {
     rewrite(join(target, file), content => content.replace(templateName, name))
   }
-  rewrite(join(target, 'package.json'), content => content.replace(PREVIEW_PORT, `celld dev . --port ${previewPort}`))
-  rewrite(join(target, 'vite.config.ts'), content => content.replace(DEV_PORT, `server: { port: ${devPort} }`))
+  rewrite(join(target, 'package.json'), content => content.replace(PREVIEW_PORT, (script, port: string) => script.replace(port, String(previewPort))))
+  rewrite(join(target, 'vite.config.ts'), content => content.replace(DEV_PORT, (line, port: string) => line.replace(port, String(devPort))))
 
   // The Kubernetes side of a worker is one small kustomize overlay.
   const overlay = join(K8S_DIR, 'workers', name)
@@ -165,8 +167,16 @@ export const newWorker: Command = {
     if (!values['no-install']) {
       const spinner = prompts.spinner()
       spinner.start('Linking workspace packages')
-      execFileSync('pnpm', ['install'], { cwd: REPO_ROOT, stdio: 'ignore' })
-      spinner.stop('Workspace linked')
+      // The lockfile gains a package, so a frozen install (pnpm's default under CI) would refuse.
+      const install = spawnSync('pnpm', ['install', '--no-frozen-lockfile'], { cwd: REPO_ROOT, encoding: 'utf8' })
+      if (install.status === 0) {
+        spinner.stop('Workspace linked')
+      }
+      else {
+        spinner.stop('pnpm install failed')
+        prompts.log.error(`${install.stderr || install.stdout}`.trim() || `pnpm exited with ${install.status ?? install.error?.message}`)
+        prompts.log.warn(`apps/${plan.name} was created. Fix the problem, then run: pnpm install`)
+      }
     }
 
     prompts.note(

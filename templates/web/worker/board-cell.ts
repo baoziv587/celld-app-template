@@ -1,5 +1,5 @@
-import type { Note } from '../shared/protocol'
-import type { Env } from './env'
+import type { Note } from '@shared/protocol'
+import type { Bindings } from './env'
 import { DurableObject } from 'cloudflare:workers'
 
 type NoteRow = Record<string, SqlStorageValue> & {
@@ -9,8 +9,8 @@ type NoteRow = Record<string, SqlStorageValue> & {
 }
 
 /** One board. The cell serializes writes, so the limit check cannot race. */
-export class BoardCell extends DurableObject<Env> {
-  constructor(ctx: DurableObjectState, env: Env) {
+export class BoardCell extends DurableObject<Bindings> {
+  constructor(ctx: DurableObjectState, env: Bindings) {
     super(ctx, env)
     ctx.storage.sql.exec('CREATE TABLE IF NOT EXISTS notes (id TEXT PRIMARY KEY, text TEXT NOT NULL, created_at INTEGER NOT NULL)')
   }

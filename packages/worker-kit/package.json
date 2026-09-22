@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "hono": "^4.13.8",
     "zod": "^4.0.0"
   }
 }

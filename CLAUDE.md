@@ -13,12 +13,18 @@ Read README.md for the dev-to-deploy flow.
   `deployments/k8s/fleet/` when every worker should change.
 - The celld version lives only in `deployments/k8s/fleet/kustomization.yaml`.
 - A worker's bucket prefix is its name: `<BUCKET_ROOT>/<worker>` in both the overlay and the release script.
-- Local dev is `vite` with `@cloudflare/vite-plugin` (workerd), enabled for `serve` only. Never let it
-  drive the build: celld rejects the wrangler config it generates.
+- Local dev is `vite` with `@cloudflare/vite-plugin` (workerd). The `api` template uses it for `serve`
+  only; celld bundles `worker/index.ts` itself. The `web` template (TanStack Start) builds through it:
+  `vite build` leaves `dist/server/index.js` + `dist/client/`, and `scripts/celld.mjs` renders the
+  source `wrangler.json` against them. Never hand celld the wrangler config the plugin writes: it rejects it.
 - Worker vars reach celld only through the Wrangler config at deploy time
-  (`WORKER_VAR_<NAME>` -> `scripts/celld-deploy.mjs`). `CELLD_VAR_*` no longer exists.
-- `wrangler.json` stays strict JSON (`celld-deploy.mjs` parses it) and its `name` equals the directory name.
+  (`WORKER_VAR_<NAME>` -> `scripts/celld.mjs`). `CELLD_VAR_*` no longer exists.
+- `wrangler.json` stays strict JSON (`celld.mjs` parses it) and its `name` equals the directory name.
 - Wire types live in `apps/<worker>/shared/` as Zod schemas used by both the worker and the client.
+- HTTP in `api` workers is Hono on `createApp()` from worker-kit (`jsonBody` for validated bodies,
+  thrown `HttpError`s become JSON). `web` workers are TanStack Start: pages and `/api` routes are files
+  in `src/routes/`, pages call server functions in `src/server/`, and `worker/notes.ts`-style modules
+  are the single place that touches cells. Do not add Hono or a second router to a web worker.
 - Server state goes in TanStack Query, client-only state in zustand.
 - All repo management goes through `pnpm manage <command>` (`scripts/manage/`). Add new operations there
   as a `Command`, not as loose scripts or package.json aliases. Add a worker with `pnpm manage new`,

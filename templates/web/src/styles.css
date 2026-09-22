@@ -1,5 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+/* Explicit, so the classes are found even when this app is listed in .gitignore
+   (Tailwind's automatic source detection skips ignored files). */
+@source "../src";
 
 @custom-variant dark (&:is(.dark *));
 

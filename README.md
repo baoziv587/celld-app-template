@@ -57,10 +57,12 @@ pnpm manage new
 
 Pick a name and a kind:
 
-- **api**: code that answers requests. Copied from `templates/api`.
-- **web**: a web page plus the code behind it. Copied from `templates/web`.
+- **api**: a JSON API built with [Hono](https://hono.dev). Copied from `templates/api`.
+- **web**: a server-rendered React app built with [TanStack Start](https://tanstack.com/start): pages,
+  server functions and `/api` routes in one place. Copied from `templates/web`.
 
-The worker is created in `apps/<name>/` and runs right away. Edit `apps/<name>/worker/` to make it yours.
+Both keep their data in Durable Objects with SQLite (celld "cells"). The worker is created in
+`apps/<name>/` and runs right away. Edit `apps/<name>/worker/` to make it yours.
 
 `apps/` is yours: add, change and delete workers freely. Delete one with `pnpm manage remove <name>`,
 which also cleans up its Kubernetes overlay. The templates live in `templates/` and are checked by
@@ -129,11 +131,16 @@ If the object storage runs inside the cluster with no public address, open a tun
 
 ```text
 apps/<name>/                  one worker
-  worker/                     request handling and Durable Objects
-  src/                        the web page (web workers only)
-  shared/                     types and schemas used by both the page and the worker
+  worker/                     Durable Objects and the code that talks to them
+  shared/                     Zod schemas used by both the client and the worker
   wrangler.json               worker config: name, bindings, default vars
   eslint.rules.ts             extra ESLint rules for this worker only (optional)
+  api workers:
+    worker/index.ts           the Hono app: routes and validation
+  web workers:
+    src/routes/               pages and /api routes (TanStack file-based routing)
+    src/server/               server functions the pages call
+    src/server.ts             the worker entry: TanStack Start + the exported cells
 templates/                    what `pnpm manage new` copies from
   api/  web/                  the two worker templates
   k8s/                        the Kubernetes overlay template
@@ -190,5 +197,8 @@ pnpm check    # ESLint + types + tests + pnpm manage check
 ## Stack
 
 Worker: TypeScript, Zod, Durable Objects with SQLite.
-Web: Vite, React, TanStack Router and Query, zustand, Tailwind CSS, shadcn/ui
-(add a component with `pnpm dlx shadcn@latest add <component>` inside `apps/<name>`).
+API workers: Hono.
+Web workers: TanStack Start (server-rendered React, server functions, `/api` routes), TanStack Query,
+zustand, Tailwind CSS, shadcn/ui (add a component with `pnpm dlx shadcn@latest add <component>` inside
+`apps/<name>`). `vite build` writes the browser assets and the worker bundle to `dist/`, which is what
+`pnpm manage preview` and `pnpm manage deploy` use.

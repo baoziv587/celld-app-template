@@ -1,5 +1,30 @@
+# Only install versions that have been public for a day (pnpm 12's default), on every pnpm version.
+minimumReleaseAge: 1440
 minimumReleaseAgeExcludePrune: true
+minimumReleaseAgeExclude:
+  - '@eslint-react/ast@5.20.5'
+  - '@eslint-react/core@5.20.5'
+  - '@eslint-react/eslint-plugin@5.20.5'
+  - '@eslint-react/eslint@5.20.5'
+  - '@eslint-react/jsx@5.20.5'
+  - '@eslint-react/shared@5.20.5'
+  - '@eslint-react/var@5.20.5'
+  - '@tanstack/query-core@5.103.2'
+  - '@tanstack/react-query@5.103.2'
+  - '@tanstack/react-start-rsc@0.1.56'
+  - '@tanstack/react-start@1.168.57'
+  - '@tanstack/start-plugin-core@1.171.47'
+  - cn@0.3.1
+  - eslint-plugin-react-dom@5.20.5
+  - eslint-plugin-react-jsx@5.20.5
+  - eslint-plugin-react-naming-convention@5.20.5
+  - eslint-plugin-react-rsc@5.20.5
+  - eslint-plugin-react-web-api@5.20.5
+  - eslint-plugin-react-x@5.20.5
+
 trustPolicy: no-downgrade
+# A trust downgrade only matters for fresh publishes; ignore it for packages older than 30 days.
+trustPolicyIgnoreAfter: 43200
 shellEmulator: true
 
 packages:
@@ -7,6 +32,8 @@ packages:
   - templates/*
   - packages/*
 
-onlyBuiltDependencies:
-  - esbuild
-  - lefthook
+# Dependencies whose install scripts may run (esbuild and workerd fetch binaries, lefthook installs git hooks).
+allowBuilds:
+  esbuild: true
+  lefthook: true
+  workerd: true

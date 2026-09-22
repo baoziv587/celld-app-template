@@ -2,6 +2,7 @@ node_modules
 dist/
 .celld/
 .wrangler/
+.tanstack/
 .dev.vars
 .env
 wrangler.deploy.json
@@ -11,3 +12,5 @@ deployments/deploy.env
 deployments/k8s/platform/credentials.env
 .DS_Store
 *.tsbuildinfo
+apps/test/*
+deployments/k8s/workers/test
