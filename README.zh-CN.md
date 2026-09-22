@@ -151,7 +151,8 @@ scripts/manage/               `pnpm manage` 的实现
   示例见 [templates/web/eslint.rules.ts](templates/web/eslint.rules.ts)。
 - worker 不能关闭 root 规则。一旦这么写，ESLint 会拒绝运行。
 
-pre-push git hook 会对整个仓库运行 ESLint，失败则阻止 push。`pnpm install` 会自动安装这个 hook。
+pre-push git hook 会对整个仓库运行 ESLint，失败则阻止 push。hook 由 [lefthook](https://lefthook.dev)
+管理（`lefthook.yml`），`pnpm install` 会自动安装。如果 hook 丢失，运行 `pnpm lefthook install`。
 `pnpm lint:fix` 可以自动修复大部分问题。
 
 一次运行所有检查：

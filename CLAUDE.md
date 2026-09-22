@@ -28,6 +28,8 @@ Read README.md for the dev-to-deploy flow.
   depend on this repo's worker-kit, tsconfig and fleet base, so a remote template would drift.
 - Root ESLint rules bind every app. App-specific rules go in `apps/<name>/eslint.rules.ts` and may only
   add or tighten; never create an `eslint.config.ts` inside an app, and never bypass the pre-push hook.
+- Git hooks are defined in `lefthook.yml` (installed by lefthook's postinstall). Add hooks there,
+  never as files under `.git/hooks` or a custom `core.hooksPath`.
 - Shell scripts must run on macOS system bash 3.2 and pass `shellcheck -x`.
 
 ## Verify

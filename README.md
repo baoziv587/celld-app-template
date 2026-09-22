@@ -154,8 +154,9 @@ One ESLint config, `eslint.config.ts`, covers the whole repo.
   See [templates/web/eslint.rules.ts](templates/web/eslint.rules.ts).
 - A worker cannot turn a root rule off. If it tries, ESLint refuses to run.
 
-A pre-push git hook runs ESLint on the whole repo and blocks the push if it fails. `pnpm install`
-sets the hook up. `pnpm lint:fix` repairs most problems.
+A pre-push git hook runs ESLint on the whole repo and blocks the push if it fails. Hooks are managed
+by [lefthook](https://lefthook.dev) (`lefthook.yml`) and installed by `pnpm install`. If they are
+missing, run `pnpm lefthook install`. `pnpm lint:fix` repairs most problems.
 
 Run every check at once:
 

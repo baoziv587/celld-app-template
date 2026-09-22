@@ -1,0 +1,10 @@
+# Git hooks. `pnpm install` sets them up (lefthook's postinstall runs `lefthook install`).
+# https://lefthook.dev/configuration/
+
+pre-push:
+  commands:
+    eslint:
+      # The whole repo is linted, not just the pushed files, so an app cannot
+      # slip past the root rules.
+      run: pnpm run -s lint:strict
+      fail_text: ESLint failed, push aborted. Try `pnpm lint:fix`, then fix what remains.
